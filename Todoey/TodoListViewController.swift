@@ -11,7 +11,7 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
 // They are cell 1, cell 2
-    let itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,5 +39,32 @@ class TodoListViewController: UITableViewController {
 // Getting rid of Grey Color when you select the row
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+// Creating an empty Local Variable TextField
+        var userTextField = UITextField()
+        
+// Creating Alert to add ToDo's
+        let alert = UIAlertController(title: "Add New Todoey", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Todoey", style: .default) { (action) in
+// Shows what will happen once the user clicks the Add Item Button on our UIAlert
+       self.itemArray.append(userTextField.text!)
+//      itemArray.append(userTextField.text ?? "New item")
+// in order to add a New Data (message)
+            self.tableView.reloadData()
+        }
+       
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new todoey"
+// Assigning user's message to our empty Local Variable TextField and Display
+            userTextField = alertTextField
+
+        }
+       
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 
