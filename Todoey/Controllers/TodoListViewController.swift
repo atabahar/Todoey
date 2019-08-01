@@ -12,20 +12,17 @@ class TodoListViewController: UITableViewController {
 
 // Making an Array of Item Objects
     var itemArray = [Item]()
-// Key Value User Defaults, to save for now because we are not using any Backend Platform for this App
-    let defaults = UserDefaults.standard
+// Gotta be in Global Constant variable to access it below lines, Here we turn our ItemArray to a .plist
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-// Calling our Item class
-        let newItem = Item()
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
         
- // Setting and then Showing our ToDo in the Array, Key is "TodoListArray" set below
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }
+        
+        print(dataFilePath)
+
+        loadItems()
+        
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -34,7 +31,7 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-// dequeueReusableCel re-use the created cell over and over that's why we make an Item class and Dictionary
+// dequeueReusableCel re-use the created cell over and over that's why we make an Item class and Dictionary, Up and Swift file
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
         let item = itemArray[indexPath.row]
@@ -52,7 +49,7 @@ class TodoListViewController: UITableViewController {
 // Sets the done property in the Item to the opposite of what it is
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
 
-        tableView.reloadData()
+        saveItems()
         
 // Getting rid of Grey Color when you select the row
         tableView.deselectRow(at: indexPath, animated: true)
@@ -69,13 +66,10 @@ class TodoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = userTextField.text!
 // Shows what will happen once the user clicks the Add Item Button on our UIAlert
-       self.itemArray.append(newItem)
+            self.itemArray.append(newItem)
 //      itemArray.append(userTextField.text ?? "New item") diyebilirdik
-// Saving under the key "TodoListArray" and updating item to the UserDefaults so it stays in our Array
-       self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
-// in order to add a New Data (message)
-            self.tableView.reloadData()
+            self.saveItems()
         }
     
         alert.addTextField { (alertTextField) in
@@ -88,6 +82,30 @@ class TodoListViewController: UITableViewController {
         alert.addAction(action)
         
         present(alert, animated: true, completion: nil)
+    }
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        // Then initialize it
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+        // in order to add a New Data (message)
+        self.tableView.reloadData()
+    }
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+           
+           let decoder = PropertyListDecoder()
+            
+            do {
+            itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+        }
     }
     
 }
